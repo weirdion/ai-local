@@ -26,7 +26,7 @@ These commands set `HOMEBREW_NO_AUTO_UPDATE=1` so Homebrew does not reach out to
    screen -S ollama
    make ollama-serve
    ```
-   The target pins `OLLAMA_HOST=127.0.0.1:11434` and `OLLAMA_ORIGINS=127.0.0.1` so the API stays loopback-only. You can detach with `Ctrl+A, D` and later reattach.
+   The target pins `OLLAMA_HOST=127.0.0.1:11434` and the allowed origins (`127.0.0.1`, `localhost`, `file://*`) so the API stays loopback-only. You can detach with `Ctrl+A, D` and later reattach.
 2. From another shell, pull trusted model tags with:
    ```bash
    make ollama-pull MODEL=llama3.1:8b
@@ -36,9 +36,34 @@ These commands set `HOMEBREW_NO_AUTO_UPDATE=1` so Homebrew does not reach out to
 
 For Hugging Face models, prefer `uv` virtual environments plus `huggingface-cli download --revision <tag>` so you can verify checksums before execution.
 
+## CLI interaction helpers
+
+- Interactive chat (maintains context until you exit):
+  ```bash
+  make ollama-chat MODEL=llama3.1:8b
+  ```
+- One-off prompt without keeping the session alive:
+  ```bash
+  make ollama-ask MODEL=llama3.1:8b PROMPT='Summarise the Brewfile policy'
+  ```
+
+Both targets inherit the same localhost bindings as `ollama-serve` so requests never leave the machine. When piping prompts, review the output before copying anywhere sensitive.
+
+## Minimal web UI
+
+A throwaway web client lives in `ui/ollama-chat.html`. It runs entirely in the browser session and keeps conversation state in memory only. The page enforces a strict Content Security Policy (self-only assets, explicit `127.0.0.1` network access) and omits persistent storage. Dark mode is enabled by default, with an inline toggle for light mode.
+
+```bash
+make ui-serve UI_PORT=8000
+open http://127.0.0.1:8000/ollama-chat.html
+```
+
+Shut the server with `Ctrl+C` and close the tab to drop the session. Avoid serving the page from anything broader than `127.0.0.1`; if you must expose it elsewhere, audit the CSP and the hosting stack first.
+
 ## Security notes
 
 - Only install dependencies listed in the `Brewfile`. If you need something new, add it intentionally and capture the rationale in `DECISIONS.md`.
 - Before pulling model weights or new tools, read the upstream release notes and validate signatures or checksums when provided.
 - Keep Ollama bound to localhost unless you deliberately expose it behind secure authentication.
 - Snapshot your current taps and formula versions with `brew bundle dump --force --file Brewfile.full` when you want a full inventory separate from the curated list.
+- When hosting the web UI, ensure it is served via `make ui-serve` (loopback bind) so CSP headers are respected and no additional directories are exposed.

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Ollama Local Chat</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src http://127.0.0.1:11434; style-src 'self'; script-src 'self';">
+  <meta name="referrer" content="no-referrer">
+  <link rel="stylesheet" href="ollama-chat.css">
+</head>
+<body data-theme="dark">
+  <div id="app">
+    <header>
+      <h1>Ollama Local Chat</h1>
+    </header>
+    <div id="controls">
+      <label for="modelSelect">Model:</label>
+      <select id="modelSelect"></select>
+      <button id="refreshModels" type="button">Refresh</button>
+      <button id="resetChat" type="button">Clear Session</button>
+      <button id="themeToggle" type="button" aria-label="Toggle theme">Switch to Light</button>
+    </div>
+    <div id="conversation" aria-live="polite"></div>
+    <form id="chatForm" autocomplete="off">
+      <textarea id="prompt" placeholder="Ask something…" required></textarea>
+      <div id="formControls">
+        <button type="submit">Send</button>
+        <span id="status" role="status" aria-live="polite"></span>
+      </div>
+    </form>
+  </div>
+  <script src="ollama-chat.js" defer></script>
+</body>
+</html>
