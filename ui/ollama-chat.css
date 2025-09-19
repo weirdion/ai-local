@@ -12,7 +12,7 @@ body {
   --input-bg: #161922;
   --muted-text: #9aa5be;
   margin: 0;
-  min-height: 80vh;
+  min-height: 90vh;
   background: var(--bg-color);
   color: var(--text-color);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
@@ -93,7 +93,7 @@ button[disabled] {
   border: 1px solid var(--card-border);
   border-radius: 1rem;
   padding: 1.25rem;
-  min-height: 200px;
+  min-height: 260px;
   flex: 1;
   overflow-y: auto;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
@@ -144,10 +144,15 @@ button[disabled] {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 
 textarea {
-  width: 100%;
+  width: 95%;
   min-height: 140px;
   padding: 1rem;
   border-radius: 1rem;
@@ -174,6 +179,24 @@ textarea:focus {
 #status {
   font-size: 0.9rem;
   color: var(--muted-text);
+}
+
+#metrics {
+  font-size: 0.85rem;
+  color: var(--muted-text);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+kbd {
+  font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.8rem;
 }
 
 @media (max-width: 640px) {

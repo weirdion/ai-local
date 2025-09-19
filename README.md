@@ -58,6 +58,10 @@ make ui-serve UI_PORT=8000
 open http://127.0.0.1:8000/ollama-chat.html
 ```
 
+Features:
+- Keyboard shortcut: `⌘/Ctrl+Enter` submits the prompt (mirrors the button label).
+- Token telemetry: prompt, completion, and context buffer counts are shown after each reply so you can gauge remaining headroom versus the model’s context length. Ollama will evict the oldest tokens once the configured context window (`OLLAMA_CONTEXT_LENGTH`, default aligns with the model’s `num_ctx`) is exceeded, so watch the counter if you need earlier turns.
+
 Shut the server with `Ctrl+C` and close the tab to drop the session. Avoid serving the page from anything broader than `127.0.0.1`; if you must expose it elsewhere, audit the CSP and the hosting stack first.
 
 ## Security notes

@@ -14,6 +14,7 @@ const formEl = document.getElementById('chatForm');
 const statusEl = document.getElementById('status');
 const submitBtn = formEl.querySelector('button[type="submit"]');
 const bodyEl = document.body;
+const metricsEl = document.getElementById('metrics');
 
 function setTheme(theme) {
   const nextTheme = theme === 'light' ? 'light' : 'dark';
@@ -30,12 +31,33 @@ themeToggle.addEventListener('click', toggleTheme);
 
 globalThis.addEventListener('DOMContentLoaded', () => {
   setTheme('dark');
+  setMetrics({ promptTokens: null, completionTokens: null, contextTokens: null });
   loadModels();
 });
 
 function setStatus(text, isError = false) {
   statusEl.textContent = text || '';
   statusEl.style.color = isError ? '#f87171' : 'var(--muted-text)';
+}
+
+function setMetrics({ promptTokens, completionTokens, contextTokens }) {
+  if (promptTokens == null && completionTokens == null && contextTokens == null) {
+    metricsEl.textContent = '';
+    return;
+  }
+
+  const parts = [];
+  if (typeof promptTokens === 'number') {
+    parts.push(`Prompt: ${promptTokens} tokens`);
+  }
+  if (typeof completionTokens === 'number') {
+    parts.push(`Completion: ${completionTokens} tokens`);
+  }
+  if (typeof contextTokens === 'number') {
+    parts.push(`Context buffer: ${contextTokens} tokens`);
+  }
+
+  metricsEl.textContent = parts.join(' • ');
 }
 
 function renderConversation() {
@@ -113,6 +135,12 @@ async function sendMessage(prompt) {
     }
     context = data.context || context;
     renderConversation();
+
+    const promptTokens = typeof data.prompt_eval_count === 'number' ? data.prompt_eval_count : undefined;
+    const completionTokens = typeof data.eval_count === 'number' ? data.eval_count : undefined;
+    const contextTokens = Array.isArray(context) ? context.length : undefined;
+    setMetrics({ promptTokens, completionTokens, contextTokens });
+
     setStatus('');
   } catch (err) {
     setStatus(`Request failed: ${err.message}`, true);
@@ -130,6 +158,7 @@ resetBtn.addEventListener('click', () => {
   context = null;
   renderConversation();
   setStatus('Session cleared.');
+  setMetrics({ promptTokens: null, completionTokens: null, contextTokens: null });
 });
 
 formEl.addEventListener('submit', (event) => {
@@ -141,4 +170,11 @@ formEl.addEventListener('submit', (event) => {
   }
   promptEl.value = '';
   void sendMessage(prompt);
+});
+
+promptEl.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+    event.preventDefault();
+    formEl.requestSubmit();
+  }
 });
