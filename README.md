@@ -125,3 +125,36 @@ Notes
 - All generation runs in a `uv`-managed ephemeral environment with explicit packages.
 - Security: safetensors are preferred. Loading `.bin` uses Python pickle under the hood;
   enable it only if you trust the source and have validated hashes in the lockfile.
+
+## Cleanup
+
+Use these targets to remove local model snapshots and caches when you need to free space:
+
+- Remove one local model snapshot and its lockfile:
+  ```bash
+  make hf-clean HF_REPO=org/name
+  ```
+- Inspect and clear the scoped Hugging Face cache (under `.cache/huggingface/hub`):
+  ```bash
+  make hf-scan-cache
+  make hf-clean-cache
+  ```
+- Remove an Ollama model and prune unused blobs:
+  ```bash
+  make ollama-clean OLLAMA_MODEL=llama3.1:8b
+  make ollama-prune
+  ```
+- Prune uv’s Python package cache:
+  ```bash
+  make uv-clean-cache
+  ```
+
+- Clean everything (local snapshots + caches + uv + Ollama blobs):
+  ```bash
+  make clean-all CONFIRM=1
+  ```
+  This removes `models/`, `.cache/huggingface/`, prunes uv’s cache, and calls `ollama prune`. Artifacts under `out/` are not removed.
+
+Notes
+- The repo keeps snapshots in `models/` and caches in `.cache/huggingface/`; both are git-ignored.
+- Ollama commands target `127.0.0.1:11434` by default as part of the local-only posture.

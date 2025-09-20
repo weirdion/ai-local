@@ -67,6 +67,57 @@ hf-safe-download:
 	$(HF_ENV) uv run --with huggingface_hub scripts/hf_download.py \
 	  --repo $(HF_REPO) --revision $(HF_REV) --include "$(HF_INCLUDE)" --dest models
 
+# --- Cleanup helpers ---
+.PHONY: hf-clean hf-scan-cache hf-clean-cache ollama-clean ollama-prune uv-clean-cache clean-all
+
+# Remove a specific local snapshot + its lockfile
+# Usage: make hf-clean HF_REPO=org/name
+hf-clean:
+	@if [ -z "$(strip $(HF_REPO))" ]; then \
+		echo "HF_REPO is required (e.g., stabilityai/stable-diffusion-2-1)" >&2; \
+		exit 2; \
+	fi
+	rm -rf "models/$(HF_REPO)" "models/$(HF_REPO).lock.json" || true
+	@echo "Removed models/$(HF_REPO) and lockfile if present."
+
+# Inspect and clean the scoped Hugging Face cache under .cache/huggingface
+hf-scan-cache:
+	HUGGINGFACE_HUB_CACHE=$(PWD)/.cache/huggingface/hub huggingface-cli scan-cache || true
+
+hf-clean-cache:
+	HUGGINGFACE_HUB_CACHE=$(PWD)/.cache/huggingface/hub huggingface-cli delete-cache --yes || true
+	@echo "Cleared .cache/huggingface/hub"
+
+# Ollama model cleanup (requires local server)
+# Usage: make ollama-clean OLLAMA_MODEL=llama3.1:8b
+ollama-clean:
+	@if [ -z "$(strip $(OLLAMA_MODEL))" ]; then \
+		echo "OLLAMA_MODEL is required (e.g., llama3.1:8b)" >&2; \
+		exit 2; \
+	fi
+	OLLAMA_HOST=127.0.0.1:11434 ollama rm "$(OLLAMA_MODEL)"
+
+ollama-prune:
+	OLLAMA_HOST=127.0.0.1:11434 ollama prune
+
+# uv cache cleanup (wheels, downloads)
+uv-clean-cache:
+	uv cache prune || true
+
+# Danger: remove local HF snapshots and caches, prune uv + Ollama
+# Usage: make clean-all CONFIRM=1
+clean-all:
+	@if [ "$(CONFIRM)" != "1" ]; then \
+		echo "This will remove models/ and .cache/huggingface, prune uv cache, and run 'ollama prune'."; \
+		echo "Re-run with CONFIRM=1 to proceed: make clean-all CONFIRM=1"; \
+		exit 2; \
+	fi
+	rm -rf models || true
+	rm -rf .cache/huggingface || true
+	uv cache prune || true
+	OLLAMA_HOST=127.0.0.1:11434 ollama prune || true
+	@echo "Cleaned local snapshots, caches, and pruned Ollama + uv."
+
 # --- ZeroScope helpers ---
 .PHONY: zeroscope-download zeroscope-generate
 
