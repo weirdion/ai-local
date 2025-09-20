@@ -73,18 +73,21 @@ hf-safe-download:
 ZEROSCOPE_REPO ?= cerspense/zeroscope_v2_576w
 ZEROSCOPE_REV ?= main
 ZEROSCOPE_OUT ?= out/zeroscope.mp4
-ZEROSCOPE_PROMPT ?= "A golden retriever running through a green grass yard with a big smile on her face and ears flapping in the win"
-ZEROSCOPE_FRAMES ?= 48
+ZEROSCOPE_PROMPT ?= vibrant sunlit coastal city skyline, gentle clouds moving, wide shot, vibrant natural colors, daylight, balanced exposure, no filters
+ZEROSCOPE_FRAMES ?= 12
 ZEROSCOPE_WIDTH ?= 384
-ZEROSCOPE_HEIGHT ?= 216
-ZEROSCOPE_STEPS ?= 12
-ZEROSCOPE_GUIDANCE ?= 6.0
-ZEROSCOPE_SCHEDULER ?= dpm
-ZEROSCOPE_FP32 ?= 0
+ZEROSCOPE_HEIGHT ?= 224
+ZEROSCOPE_STEPS ?= 20
+ZEROSCOPE_GUIDANCE ?= 7.5
+ZEROSCOPE_SCHEDULER ?= euler
+ZEROSCOPE_FP32 ?= 1
 ZEROSCOPE_SAVE_FRAMES ?=
 ZEROSCOPE_FPS ?= 8
 ZEROSCOPE_ALLOW_BIN ?= 1
 ZEROSCOPE_ALLOW_PICKLE ?= 1
+ZEROSCOPE_SEED ?= 42
+ZEROSCOPE_NEGATIVE ?= monochrome, grayscale, blue tint, low saturation, dull colors, underexposed, dark, heavy vignette
+ZEROSCOPE_STYLE ?= cartoon, cel-shaded, vibrant colors, bold outlines, dynamic lighting, exaggerated features
 
 zeroscope-download:
 	INCL=$$( if [ "$(ZEROSCOPE_ALLOW_BIN)" = "1" ]; then echo '*.safetensors,*.json,*.txt,*.bin'; else echo '*.safetensors,*.json,*.txt'; fi ); \
@@ -101,7 +104,7 @@ zeroscope-generate:
 	  --with 'imageio[ffmpeg]' \
 	  scripts/zeroscope_generate.py \
 	  --model-path models/$(ZEROSCOPE_REPO) \
-	  --prompt $(ZEROSCOPE_PROMPT) \
+	  --prompt "$(ZEROSCOPE_PROMPT)" \
 	  --frames $(ZEROSCOPE_FRAMES) \
 	  --width $(ZEROSCOPE_WIDTH) --height $(ZEROSCOPE_HEIGHT) \
 	  --steps $(ZEROSCOPE_STEPS) --guidance $(ZEROSCOPE_GUIDANCE) \
@@ -109,6 +112,9 @@ zeroscope-generate:
 	  $(if $(filter 1,$(ZEROSCOPE_FP32)),--fp32,) \
 	  $(if $(ZEROSCOPE_SAVE_FRAMES),--save-frames-dir $(ZEROSCOPE_SAVE_FRAMES),) \
 	  $(if $(filter 1,$(ZEROSCOPE_ALLOW_PICKLE)),--allow-pickle,) \
+	  $(if $(ZEROSCOPE_SEED),--seed $(ZEROSCOPE_SEED),) \
+	  $(if $(ZEROSCOPE_NEGATIVE),--negative "$(ZEROSCOPE_NEGATIVE)",) \
+	  $(if $(ZEROSCOPE_STYLE),--style "$(ZEROSCOPE_STYLE)",) \
 	  --fps $(ZEROSCOPE_FPS) \
 	  --out $(ZEROSCOPE_OUT)
 

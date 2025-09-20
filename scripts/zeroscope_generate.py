@@ -140,6 +140,8 @@ def main() -> int:
     parser.add_argument("--guidance", type=float, default=9.0)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--out", default="out/zeroscope.mp4", help="Output video path (.mp4)")
+    parser.add_argument("--negative", default=None, help="Negative prompt terms (e.g., 'monochrome, grayscale, blue tint, low saturation')")
+    parser.add_argument("--style", default=None, help="Positive style prefix (e.g., 'vibrant colors, daylight, balanced exposure')")
     parser.add_argument("--fps", type=int, default=8, help="Video frames per second for export")
     parser.add_argument("--scheduler", default="dpm", choices=["dpm", "euler", "ddim", "pndm", "unipc"], help="Sampler/scheduler")
     parser.add_argument("--fp32", action="store_true", help="Force float32 even on MPS/CUDA (stability over speed)")
@@ -209,13 +211,15 @@ def main() -> int:
 
     print(f"device={device}, dtype={dtype}, frames={args.frames}, size={args.width}x{args.height}, steps={args.steps}, guidance={args.guidance}, scheduler={args.scheduler}")
 
+    full_prompt = f"{args.style}, {args.prompt}" if args.style else args.prompt
     result = pipe(
-        args.prompt,
+        full_prompt,
         num_inference_steps=args.steps,
         guidance_scale=args.guidance,
         num_frames=args.frames,
         height=args.height,
         width=args.width,
+        negative_prompt=(args.negative or None),
         generator=generator,
     )
     # Extract frames robustly across diffusers versions
