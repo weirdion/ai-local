@@ -10,3 +10,4 @@
 | 2025-09-19 | Added token telemetry + keyboard shortcuts to UI         | Monitor prompt/completion/context usage and match desktop chat ergonomics |
 | 2025-09-19 | Added `make ui-serve` for bounded UI hosting             | Serve UI with localhost bind and clear stop/start workflow |
 | 2025-09-19 | Pulled `llama3.1:8b` via `make ollama-pull`             | Baseline local LLM for benchmarking; verifying SHA256 during pull ensures integrity |
+| 2025-09-19 | Integrated Hugging Face snapshot + lockfile              | Enable pinned, auditable model pulls into local cache and models/ |

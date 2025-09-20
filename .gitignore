@@ -1,0 +1,22 @@
+# macOS & editors
+.DS_Store
+.idea/
+.vscode/
+
+# Python/uv
+.venv/
+__pycache__/
+.python-version
+
+# Local caches & artifacts
+.cache/
+models/
+
+# Environment
+.env
+
+# Brew snapshot
+Brewfile.full
+
+# Output folder
+out
