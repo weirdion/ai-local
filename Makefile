@@ -111,3 +111,54 @@ zeroscope-generate:
 	  $(if $(filter 1,$(ZEROSCOPE_ALLOW_PICKLE)),--allow-pickle,) \
 	  --fps $(ZEROSCOPE_FPS) \
 	  --out $(ZEROSCOPE_OUT)
+
+# --- Stable Diffusion comic (text -> multi-image grid) ---
+.PHONY: comic-download comic-generate
+
+COMIC_REPO ?= stabilityai/stable-diffusion-2-1
+COMIC_REV ?= main
+COMIC_WIDTH ?= 512
+COMIC_HEIGHT ?= 512
+COMIC_STEPS ?= 40
+COMIC_GUIDANCE ?= 6.5
+COMIC_ROWS ?= 1
+COMIC_COLS ?= 3
+COMIC_PROMPTS ?= a city skyline at dawn; a hero leaps across rooftops in the city; a mysterious figure watches from a rooftop
+COMIC_OUT ?= out/comic.png
+COMIC_FP32 ?= 0
+COMIC_NEGATIVE ?= blurry, lowres, deformed, disfigured, extra limbs, extra fingers, mutated, watermark, text, logo, worst quality, low quality
+COMIC_SCHEDULER ?= euler
+COMIC_SEED ?= 20
+COMIC_STYLE ?= comic book style, bold ink outlines, halftone shading, consistent palette, flat colors
+COMIC_VARIANTS ?= 3
+COMIC_INIT_FROM_FIRST ?= 0
+COMIC_STRENGTH ?= 0.6
+COMIC_CLIP_SCORE ?= 1
+COMIC_CLIP_MODEL ?= openai/clip-vit-base-patch32
+
+comic-download:
+	$(MAKE) hf-safe-download HF_REPO=$(COMIC_REPO) HF_REV=$(COMIC_REV) HF_INCLUDE='*.safetensors,*.json,*.txt'
+
+comic-generate:
+	uv run \
+	  --with torch \
+	  --with diffusers \
+	  --with transformers \
+	  --with accelerate \
+	  --with pillow \
+	  scripts/sd_comic.py \
+	  --model-path models/$(COMIC_REPO) \
+	  --prompts "$(COMIC_PROMPTS)" \
+	  --rows $(COMIC_ROWS) --cols $(COMIC_COLS) \
+	  --width $(COMIC_WIDTH) --height $(COMIC_HEIGHT) \
+	  --steps $(COMIC_STEPS) --guidance $(COMIC_GUIDANCE) \
+	  $(if $(filter 1,$(COMIC_FP32)),--fp32,) \
+	  $(if $(COMIC_NEGATIVE),--negative "$(COMIC_NEGATIVE)",) \
+	  --seed $(COMIC_SEED) \
+	  --scheduler $(COMIC_SCHEDULER) \
+	  $(if $(COMIC_STYLE),--style "$(COMIC_STYLE)",) \
+	  --variants $(COMIC_VARIANTS) \
+	  $(if $(filter 1,$(COMIC_INIT_FROM_FIRST)),--init-from-first,) \
+	  --strength $(COMIC_STRENGTH) \
+	  $(if $(filter 1,$(COMIC_CLIP_SCORE)),--clip-score --clip-model $(COMIC_CLIP_MODEL),) \
+	  --out "$(COMIC_OUT)"
